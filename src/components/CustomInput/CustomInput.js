@@ -9,7 +9,7 @@ const CustomInput = ({placeHolder,onChangeText,value}) => {
       
       onChangeText={onChangeText}
       value={value}
-      placeholderTextColor={colors.whiteColor} placeholder={placeHolder} style={styles.input}/>
+      placeholderTextColor={'black'} placeholder={placeHolder} style={styles.input}/>
     </View>
   )
 }
@@ -19,9 +19,10 @@ export default CustomInput
 const styles = StyleSheet.create({
     input:{
         fontSize:20,
-        color:colors.whiteColor,
+        color:'black',
         borderBottomWidth:2,
         borderBottomColor:colors.secondary,
-        paddingBottom:2
+        paddingBottom:2,
+        backgroundColor:'white'
     }
 })

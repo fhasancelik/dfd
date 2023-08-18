@@ -30,7 +30,10 @@ shadowOffset: {
 },
 shadowOpacity:  0.25,
 shadowRadius: 20.00,
-elevation: 24
+elevation: 24,
+alignItems:'center'
+,
+justifyContent:'center'
 }
 ,
 title:{
