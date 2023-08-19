@@ -1,17 +1,27 @@
-import {Image, StyleSheet, Text, View} from 'react-native';
-import React from 'react';
+import {Image, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import React,{useEffect, useState} from 'react';
 import {colors} from '../../utils/constants';
 import Icon from '../../components/Icon';
-
+import auth from '@react-native-firebase/auth'
+import firestore from '@react-native-firebase/firestore'
 const Profile = () => {
 
+  const[id,setId]=useState(auth().currentUser?.uid)
+  const[userInfo,setUserInfo]=useState({})
+console.log(auth().currentUser)
+    useEffect(() => {
+      const subscriber = firestore()
+        .collection('users')
+        .doc(id)
+        .onSnapshot(documentSnapshot => {
+         // console.log('User data: ', documentSnapshot.data());
+          setUserInfo(documentSnapshot.data())
+        });
   
-
-
-
-
-
-
+      // Stop listening for updates when no longer required
+      return () => subscriber();
+    }, [id]);
+  console.log(userInfo)
   return (
     <View style={{flex: 1}}>
       <View
@@ -42,11 +52,19 @@ const Profile = () => {
             />
           </View>
 
-          <Text>Hasan Çelik</Text>
+          <Text>{userInfo.userName}</Text>
+       <TouchableOpacity onPress={()=>console.log('ddd')}>
+       <Text>ÇıkışYap</Text>
+       </TouchableOpacity>
         </View>
 
         <View style={styles.right}>
-          <Icon name={'clipboard'} size={40} color={colors.primaryColor} />
+   
+<TouchableOpacity onPress={()=>auth().signOut()}>
+        
+<Icon name={'clipboard'} size={40} color={colors.primaryColor} />
+</TouchableOpacity>
+
         </View>
       </View>
 
@@ -54,41 +72,98 @@ const Profile = () => {
         <View style={styles.infoContainer}>
           <View style={styles.infoBox}>
             <Icon name={'mail'} size={20} color={colors.primaryColor} />
-            <View style={{flexDirection:'row',backgroundColor:'white',alignItems:'center',gap:25,paddingHorizontal:10,paddingVertical:15}}>
+            <View
+              style={{
+                flexDirection: 'row',
+                backgroundColor: 'white',
+                alignItems: 'center',
+                gap: 25,
+                paddingHorizontal: 10,
+                paddingVertical: 15,
+              }}>
               <Icon name={'mail'} size={30} color={colors.primaryColor} />
-              <View style={{borderBottomWidth:2,borderColor:colors.primaryColor,width:'50%',paddingBottom:5}}>
+              <View
+                style={{
+                  borderBottomWidth: 2,
+                  borderColor: colors.primaryColor,
+                  width: '50%',
+                  paddingBottom: 5,
+                }}>
                 <Text>E-Mail</Text>
-                <Text>hasancelikjob@gmail.com</Text>
+                <Text>{userInfo.userEmail}</Text>
               </View>
             </View>
           </View>
           <View style={styles.infoBox}>
-       
-            <View style={{flexDirection:'row',backgroundColor:'white',alignItems:'center',gap:25,paddingHorizontal:10,paddingVertical:15}}>
-              <Icon name={'code-working'} size={30} color={colors.primaryColor} />
-              <View style={{borderBottomWidth:2,borderColor:colors.primaryColor,width:'50%',paddingBottom:5}}>
+            <View
+              style={{
+                flexDirection: 'row',
+                backgroundColor: 'white',
+                alignItems: 'center',
+                gap: 25,
+                paddingHorizontal: 10,
+                paddingVertical: 15,
+              }}>
+              <Icon
+                name={'code-working'}
+                size={30}
+                color={colors.primaryColor}
+              />
+              <View
+                style={{
+                  borderBottomWidth: 2,
+                  borderColor: colors.primaryColor,
+                  width: '50%',
+                  paddingBottom: 5,
+                }}>
                 <Text>Çalıştığı Bölüm</Text>
-                <Text>React ve React Native Developer</Text>
+                <Text>{userInfo.userJob}</Text>
               </View>
             </View>
           </View>
           <View style={styles.infoBox}>
-  
-            <View style={{flexDirection:'row',backgroundColor:'white',alignItems:'center',gap:25,paddingHorizontal:10,paddingVertical:15}}>
+            <View
+              style={{
+                flexDirection: 'row',
+                backgroundColor: 'white',
+                alignItems: 'center',
+                gap: 25,
+                paddingHorizontal: 10,
+                paddingVertical: 15,
+              }}>
               <Icon name={'layers'} size={30} color={colors.primaryColor} />
-              <View style={{borderBottomWidth:2,borderColor:colors.primaryColor,width:'50%',paddingBottom:5}}>
+              <View
+                style={{
+                  borderBottomWidth: 2,
+                  borderColor: colors.primaryColor,
+                  width: '50%',
+                  paddingBottom: 5,
+                }}>
                 <Text>Tecrübe Yılı</Text>
-                <Text>3 Yıl</Text>
+                <Text>{userInfo.userExperience}</Text>
               </View>
             </View>
           </View>
           <View style={styles.infoBox}>
-        
-            <View style={{flexDirection:'row',backgroundColor:'white',alignItems:'center',gap:25,paddingHorizontal:10,paddingVertical:15}}>
+            <View
+              style={{
+                flexDirection: 'row',
+                backgroundColor: 'white',
+                alignItems: 'center',
+                gap: 25,
+                paddingHorizontal: 10,
+                paddingVertical: 15,
+              }}>
               <Icon name={'trophy'} size={30} color={colors.primaryColor} />
-              <View style={{borderBottomWidth:2,borderColor:colors.primaryColor,width:'50%',paddingBottom:5}}>
+              <View
+                style={{
+                  borderBottomWidth: 2,
+                  borderColor: colors.primaryColor,
+                  width: '50%',
+                  paddingBottom: 5,
+                }}>
                 <Text>Çalıştığı Firma</Text>
-                <Text>Arabuleu</Text>
+                <Text>{userInfo.userCompany}</Text>
               </View>
             </View>
           </View>
@@ -107,16 +182,17 @@ const styles = StyleSheet.create({
     marginTop: 15,
     gap: 20,
     marginRight: 40,
+    marginBottom:15
   },
   right: {
     marginTop: 20,
     marginRight: 30,
   },
 
-  infoContainer:{
-    marginHorizontal:15
+  infoContainer: {
+    marginHorizontal: 15,
   },
-  infoBox:{
-    margin:5
-  }
+  infoBox: {
+    margin: 5,
+  },
 });

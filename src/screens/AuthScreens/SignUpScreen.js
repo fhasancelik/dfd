@@ -1,5 +1,5 @@
 import {Image, StyleSheet, Text, View,ScrollView} from 'react-native';
-import React, {useState} from 'react';
+import React, {useContext, useState} from 'react';
 import HeaderText from '../../components/CoreComponents/Header/HeaderText';
 import {colors} from '../../utils/constants';
 import CustomInput from '../../components/CustomInput/CustomInput';
@@ -14,7 +14,10 @@ import storage from '@react-native-firebase/storage'
 import { utils } from '@react-native-firebase/app';
 
 import ImagePicker from 'react-native-image-picker';
+import { DataContext } from '../../context';
 const SignUpScreen = () => {
+
+  const{setUser}=useContext(DataContext)
  // console.log(auth().currentUser);
   //const reference = storage().ref('black-t-shirt-sm.png');
   const [photoGallery, setPhotoGallery] = useState(null);
@@ -68,7 +71,7 @@ const SignUpScreen = () => {
       .createUserWithEmailAndPassword(`${newUser.userEmail}@gmail.com`, newUser.userPassword)
       .then(async() => {
    console.log('kayıt başarılı')
-
+setUser(true)
 //user id yi güncelleiyorum
 //const userId=auth().currentUser.uid
 //console.log(userId)
@@ -117,12 +120,12 @@ firestore()
       });
   };
 
-
+console.log(auth().currentUser)
 
   return (
     <View style={styles.mainContainer}>
       <View style={styles.top}>
-        <HeaderText title={'İş Hesabı'} />
+        <HeaderText title={'Şimdi Hesab Oluştur'} />
       </View>
       <View style={styles.bottom}>
         <ScrollView style={styles.bottomMain}>
@@ -195,10 +198,12 @@ const styles = StyleSheet.create({
 
   top: {
     flex: 1,
+    alignItems:'center',
+    justifyContent:'center'
   },
   bottom: {
     backgroundColor: colors.primaryColor,
-    flex: 2,
+    flex: 7,
   },
   bottomMain: {
     marginLeft: 50,
