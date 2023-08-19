@@ -1,4 +1,4 @@
-import {Image, StyleSheet, Text, View} from 'react-native';
+import {Image, StyleSheet, Text, View,ScrollView} from 'react-native';
 import React, {useState} from 'react';
 import HeaderText from '../../components/CoreComponents/Header/HeaderText';
 import {colors} from '../../utils/constants';
@@ -9,16 +9,27 @@ import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 import AddPhoto from '../../components/AddPhoto';
 import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
-const SignUpScreen = () => {
-  //console.log(auth().currentUser);
+import firebase from '@react-native-firebase/app'
+import storage from '@react-native-firebase/storage'
+import { utils } from '@react-native-firebase/app';
 
+import ImagePicker from 'react-native-image-picker';
+const SignUpScreen = () => {
+ // console.log(auth().currentUser);
+  //const reference = storage().ref('black-t-shirt-sm.png');
   const [photoGallery, setPhotoGallery] = useState(null);
 
+//auth().signOut()
+//console.log(auth().currentUser)
   const [newUser, setNewUser] = useState({
+ 
     userName: '',
     userEmail: '',
-    userPassword: '',
-    userPhoto: '',
+    userPassword: '123456',
+    userJob:'',
+    userExperience:'',
+    userCompany:''
+  
   });
 
   const onChangeText = (key, value) => {
@@ -27,45 +38,71 @@ const SignUpScreen = () => {
 
   const choosePhotoGallry = async () => {
     const result = await launchImageLibrary();
-  
+  console.log(result.assets[0].uri)
       //setPhotoGallery(result.assets[0].uri)
-      setNewUser({...newUser, userPhoto: `${result.assets[0].uri}`});
+      setPhotoGallery(`${result.assets[0].uri}`);
     
   };
-  console.log(newUser);
-  const saveUserWithUnId = () => {
-    firestore()
-      .collection('Users')
-      .add(newUser)
-      .then(() => {
-        console.log('User added!');
-      });
-  };
+  //console.log(newUser);
 
-  const saveNewUser = userId => {
-    firestore()
-      .collection('users')
-      .doc(userId)
-      .set(newUser)
-      .then(() => {
-        console.log('User added!');
-      });
-  };
 
-  const handleSignUp = () => {
+  const addPhotoFirebase=async()=>{
+
+
+    const { uri } = photoGallery;
+    const filename = uri.substring(uri.lastIndexOf('/') + 1);
+
+    const reference = storage().ref(`images/${filename}`);
+    await reference.putFile(uri);
+
+  }
+
+
+//console.log(auth().currentUser.uid)
+
+  const handleSignUp = async() => {
+   // const reference = storage().ref('images/');
+
+
     auth()
-      .createUserWithEmailAndPassword(newUser.userEmail, newUser.userPassword)
-      .then(() => {
-        console.log('User account created & signed in!');
-        setNewUser({...newUser, userId: auth().currentUser.uid});
-        //saveNewUser(auth().currentUser.uid)
-        saveUserWithUnId();
-        setNewUser({
-          userName: '',
-          userEmail: '',
-          userPassword: '',
-          userPhoto: '',
-        });
+      .createUserWithEmailAndPassword(`${newUser.userEmail}@gmail.com`, newUser.userPassword)
+      .then(async() => {
+   console.log('kayıt başarılı')
+
+//user id yi güncelleiyorum
+//const userId=auth().currentUser.uid
+//console.log(userId)
+
+
+//storage fotğraf yükle
+
+// const task = reference.putFile(photoGallery);
+// const imageUrl= await reference.getDownloadURL()
+
+// task.then(async()=>{
+
+
+
+
+
+
+// }).then(()=>{
+
+ 
+
+// }).catch((error)=>console.log('image error',error))
+
+
+firestore()
+.collection('users')
+.doc(auth().currentUser.uid)
+.set({...newUser,userUID:auth().currentUser.uid,userPhoto:colors.img})
+.then(() => {
+  console.log('User added!');
+
+});
+
+   
       })
       .catch(error => {
         if (error.code === 'auth/email-already-in-use') {
@@ -80,13 +117,15 @@ const SignUpScreen = () => {
       });
   };
 
+
+
   return (
     <View style={styles.mainContainer}>
       <View style={styles.top}>
         <HeaderText title={'İş Hesabı'} />
       </View>
       <View style={styles.bottom}>
-        <View style={styles.bottomMain}>
+        <ScrollView style={styles.bottomMain}>
           <View style={styles.inputBox}>
             <CustomInput
               value={newUser.userName}
@@ -103,13 +142,32 @@ const SignUpScreen = () => {
               onChangeText={text => onChangeText('userPassword', text)}
               placeHolder={'Şifre Girin'}
             />
+
+<CustomInput
+              value={newUser.userJob}
+              onChangeText={text => onChangeText('userJob', text)}
+              placeHolder={'Meslek'}
+            />
+
+<CustomInput
+              value={newUser.userExperience}
+              onChangeText={text => onChangeText('userExperience', text)}
+              placeHolder={'Tecrübe Yılı'}
+            />
+
+<CustomInput
+              value={newUser.userCompany}
+              onChangeText={text => onChangeText('userCompany', text)}
+              placeHolder={'Çalıştığı firma'}
+            />
+
             <View style={styles.imageBox}>
               <AddPhoto
                 onPress={() => choosePhotoGallry()}
-                source={newUser.userPhoto}
+                source={photoGallery}
               />
               <CustomButton
-                onPress={() => choosePhotoGallry('Fotoğraf Seç')}
+                onPress={() => addPhotoFirebase()}
                 title={'Fotoğraf Seç'}
                 style={{with: 50}}
               />
@@ -121,7 +179,7 @@ const SignUpScreen = () => {
             <CustomButton onPress={() => handleSignUp()} title={'Kayıt Ol'} />
             <View></View>
           </View>
-        </View>
+        </ScrollView>
       </View>
     </View>
   );
